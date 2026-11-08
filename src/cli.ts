@@ -12,6 +12,7 @@ declare const process: {
   exitCode: number;
 };
 const fs = require("node:fs");
+const MAX_INPUT_BYTES = 1_000_000;
 
 function parseInteger(value: string, name: string): number {
   if (!/^(0|[1-9][0-9]*)$/.test(value)) throw new Error(name + " deve ser inteiro nao negativo");
@@ -20,7 +21,14 @@ function parseInteger(value: string, name: string): number {
   return number;
 }
 function readAssessment(path: string) {
-  return validateAssessment(JSON.parse(fs.readFileSync(path, "utf8") as string) as unknown);
+  // Reject oversized inputs before allocating/parsing the entire document.
+  const metadata = fs.statSync(path);
+  if (!metadata.isFile()) throw new Error("arquivo de avaliacao deve ser regular");
+  if (metadata.size > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
+  const data = fs.readFileSync(path);
+  // Recheck after read in case a writer changed the file between operations.
+  if (data.length > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
+  return validateAssessment(JSON.parse(data.toString("utf8")) as unknown);
 }
 function main(): void {
   const args = process.argv.slice(2);
