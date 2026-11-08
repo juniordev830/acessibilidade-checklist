@@ -1,6 +1,8 @@
 import { renderMarkdown, validateAssessment, Status } from "./report";
 import { FilterOptions, filterChecks, renderCsv, renderSummaryJson } from "./analytics";
 import { compareAssessments, renderComparisonMarkdown } from "./compare";
+import { buildHistory, renderHistoryMarkdown } from "./history";
+import { buildRemediationPlan, renderRemediationMarkdown } from "./remediation";
 
 declare const require: (name: string) => any;
 declare const process: {
@@ -23,11 +25,12 @@ function readAssessment(path: string) {
 function main(): void {
   const args = process.argv.slice(2);
   if (args.length === 0 || args[0].startsWith("--")) {
-    throw new Error("Uso: node dist/cli.js arquivo.json [--format=markdown|csv|json] [--status=pendente] [--query=texto] [--sort=id|titulo|status] [--offset=0] [--limit=100] [--compare=anterior.json]");
+    throw new Error("Uso: node dist/cli.js arquivo.json [--format=markdown|csv|json|plan] [--status=pendente] [--query=texto] [--sort=id|titulo|status] [--offset=0] [--limit=100] [--compare=anterior.json]");
   }
   const options: FilterOptions = {};
   let format = "markdown";
   let comparePath: string | undefined;
+  let historyPaths: string | undefined;
   const seen = new Set<string>();
   for (const arg of args.slice(1)) {
     const match = /^--([a-z]+)=(.*)$/.exec(arg);
@@ -37,7 +40,7 @@ function main(): void {
     seen.add(name);
     switch (name) {
       case "format":
-        if (!["markdown", "csv", "json"].includes(value)) throw new Error("formato invalido");
+        if (!["markdown", "csv", "json", "plan"].includes(value)) throw new Error("formato invalido");
         format = value;
         break;
       case "status":
@@ -51,6 +54,10 @@ function main(): void {
         break;
       case "offset": options.offset = parseInteger(value, name); break;
       case "limit": options.limit = parseInteger(value, name); break;
+      case "history":
+        if (!value) throw new Error("lista de historico vazia");
+        historyPaths = value;
+        break;
       case "compare":
         if (!value) throw new Error("caminho de comparacao vazio");
         comparePath = value;
@@ -59,6 +66,23 @@ function main(): void {
     }
   }
   const assessment = readAssessment(args[0]);
+  if (comparePath !== undefined && historyPaths !== undefined) {
+    throw new Error("comparacao e historico nao podem ser combinados");
+  }
+  if (historyPaths !== undefined) {
+    if (Object.keys(options).length || !["markdown", "json"].includes(format)) {
+      throw new Error("historico aceita apenas markdown ou json sem filtros");
+    }
+    const paths = historyPaths.split(",");
+    if (paths.length < 1 || paths.length > 51 || paths.some((path) => !path.trim())) {
+      throw new Error("historico exige entre 1 e 51 arquivos anteriores");
+    }
+    const history = buildHistory([...paths.map((path) => readAssessment(path.trim())), assessment]);
+    process.stdout.write(format === "json"
+      ? JSON.stringify(history, null, 2) + "\n"
+      : renderHistoryMarkdown(history));
+    return;
+  }
   if (comparePath !== undefined) {
     if (format !== "markdown" || Object.keys(options).length) {
       throw new Error("comparacao nao aceita filtros nem outros formatos");
@@ -71,6 +95,11 @@ function main(): void {
     return;
   }
   const selected = filterChecks(assessment, options);
+  if (format === "plan") {
+    process.stdout.write(renderRemediationMarkdown(
+      buildRemediationPlan({ ...assessment, itens: selected.itens })));
+    return;
+  }
   if (format === "csv") {
     process.stdout.write(renderCsv(assessment, selected.itens));
   } else {

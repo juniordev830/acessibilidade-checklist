@@ -43,3 +43,20 @@ Os arquivos sao processados localmente. **Nao armazene dados sensiveis em reposi
 ## Proximos passos
 
 Interface web, armazenamento editavel, trilha de revisoes assinada e mapeamento assistido de criterios WCAG podem ser implementados em evolucoes futuras.
+
+## Planejamento de correcoes e historico
+
+O formato `plan` gera um backlog de itens pendentes com checkboxes e instrucoes para coleta de evidencia, sem inventar severidade ou estimativa de esforco:
+
+```bash
+node dist/cli.js examples/avaliacao.json --format=plan > plano.md
+```
+
+Para analisar uma serie temporal da mesma pagina, forneca arquivos anteriores em ordem cronologica e o arquivo atual como primeiro argumento:
+
+```bash
+node dist/cli.js atual.json --history=anterior1.json,anterior2.json > historico.md
+node dist/cli.js atual.json --history=anterior1.json,anterior2.json --format=json > historico.json
+```
+
+O historico aceita entre 2 e 52 avaliacoes, datas estritamente crescentes e a mesma pagina. Relata transicoes por criterio e regressoes, sem considerar itens excluidos como melhorias. Nao infere resultados de testes de acessibilidade; apenas compara evidencias registradas manualmente.
