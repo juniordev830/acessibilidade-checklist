@@ -1,48 +1,35 @@
 # Checklist de Acessibilidade
 
-> Status: concepção. Este repositório contém apenas o escopo inicial; ainda não há aplicação executável ou funcionalidades implementadas.
+Primeiro MVP funcional em **TypeScript**, para registrar verificacoes manuais de acessibilidade de uma pagina e exportar resultado em Markdown.
 
-## Ideia
+## O que funciona
 
-Guiar revisões manuais de acessibilidade de interfaces web.
+- Registra pagina, data, identificador, criterio, estado e evidencia.
+- Diferencia **aprovado**, **pendente** e **nao_aplicavel**.
+- Recusa IDs duplicados, datas invalidas e estados desconhecidos.
+- Mantem as evidencias no relatorio, escapando marcacao Markdown enviada como texto.
+- Gera contagem por estado e relatorio legivel para revisao.
 
-## Primeira versão planejada
+## Executar
 
-- [ ] Criar uma avaliação de página.
-- [ ] Registrar verificações de teclado, rótulos e contraste.
-- [ ] Exportar resultado em Markdown.
+Requer Node.js 22+ e npm. Os dados no exemplo sao ficticios.
 
-## Modelo inicial
+```bash
+npm install
+npm run build
+node dist/cli.js examples/avaliacao.json > relatorio.md
+npm test
+```
 
-Avaliação, item de verificação e evidência.
+O relatorio sera criado em `relatorio.md` no diretorio atual. Consulte `examples/avaliacao.json` para preencher sua avaliacao.
 
-## Regras e limites
+## Criterios de aceite cobertos
 
-Distinguir aprovado, pendente e não aplicável; checklist não equivale a certificação.
+- [x] Criar uma avaliacao de pagina a partir de JSON
+- [x] Registrar verificacoes, status e evidencia
+- [x] Exportar Markdown preservando os itens
+- [x] Testar tratamento de entradas invalidas
 
-Escopo mantido pequeno: sem pagamentos, integrações externas, infraestrutura de produção ou uso de dados pessoais reais nesta etapa.
+## Limites e proximas etapas
 
-## Tecnologia proposta
-
-TypeScript + Svelte.
-
-A escolha é uma proposta para a futura implementação; nenhuma dependência foi instalada e a tecnologia ainda não foi implementada.
-
-## Critério de conclusão do primeiro incremento
-
-Exportação deve preservar status e evidência de cada item avaliado.
-
-## Próximos passos
-
-1. Revisar este escopo antes de começar a implementação.
-2. Preparar o ambiente mínimo da tecnologia escolhida.
-3. Implementar um fluxo completo e validar o critério acima.
-4. Documentar a execução e acrescentar exemplos demonstrativos.
-
-## Possíveis evoluções
-
-Depois de validar o fluxo principal, avaliar persistência, acessibilidade e uma interface mais completa conforme a plataforma. Evoluções não fazem parte da entrega atual.
-
-## Como executar
-
-Ainda não há comandos de execução. Eles serão adicionados quando existir uma primeira versão funcional.
+Este checklist **nao realiza auditoria automatica nem certifica conformidade WCAG**. A verificacao de teclado, rotulos e contraste precisa ser feita por quem avalia. Uma interface web em Svelte e persistencia editavel sao evolucoes futuras. Nenhuma integracao externa nem credencial e exigida.
