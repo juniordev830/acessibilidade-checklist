@@ -70,6 +70,20 @@ test("cli rejeita comparacao com filtros", () => withFixtures((now, old) => {
   assert.equal(result.status, 2);
   assert.match(result.stderr, /comparacao nao aceita/);
 }));
+test("cli rejeita arquivo maior que 1 MB antes de analisar JSON", () => withFixtures((now) => {
+  writeFileSync(now, " ".repeat(1_000_001));
+  const result = run([now]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /limite de 1 MB/);
+}));
+
+test("cli rejeita caminho de diretorio como arquivo de avaliacao", () => withFixtures((now) => {
+  const { dirname } = require("node:path");
+  const result = run([dirname(now)]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /regular/);
+}));
+
 test("cli rejeita arquivo inexistente com codigo de erro", () => {
   const result = run(["/nao-existe/arquivo.json"]);
   assert.equal(result.status, 2);
