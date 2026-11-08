@@ -14,6 +14,13 @@ Ferramenta local em **TypeScript** para documentar verificacoes **manuais** de a
 - Diagnostico de evidencias ausentes/curtas e titulos possivelmente duplicados.
 - Testes automatizados Node.js e compilacao TypeScript estrita.
 
+## Limite de entrada
+
+A interface de linha de comando aceita apenas arquivos JSON regulares com até **1 MB**
+(1.000.000 bytes) por avaliação. Entradas maiores são rejeitadas antes da análise
+para reduzir consumo de memória. O limite também se aplica aos arquivos usados
+em comparações e históricos.
+
 ## Executar
 
 Requer Node.js 22+ e npm. Dados de exemplo ficticios:
