@@ -1,0 +1,24 @@
+{
+  "pagina": "https://exemplo.local/portal",
+  "data": "2026-11-08",
+  "itens": [
+    {
+      "id": "teclado",
+      "titulo": "Navegacao por teclado",
+      "status": "aprovado",
+      "evidencia": "Foco visivel nos controles principais."
+    },
+    {
+      "id": "rotulos",
+      "titulo": "Rotulos de formularios",
+      "status": "pendente",
+      "evidencia": "Campo de busca precisa de rotulo explicito."
+    },
+    {
+      "id": "midia",
+      "titulo": "Legendas em videos",
+      "status": "nao_aplicavel",
+      "evidencia": "Esta pagina nao contem video."
+    }
+  ]
+}
