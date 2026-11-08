@@ -1,35 +1,45 @@
 # Checklist de Acessibilidade
 
-Primeiro MVP funcional em **TypeScript**, para registrar verificacoes manuais de acessibilidade de uma pagina e exportar resultado em Markdown.
+Ferramenta local em **TypeScript** para documentar verificacoes **manuais** de acessibilidade. Valida entradas, organiza evidencias, compara revisoes e exporta relatorios sem transmitir dados a servicos externos.
 
-## O que funciona
+## Recursos
 
-- Registra pagina, data, identificador, criterio, estado e evidencia.
-- Diferencia **aprovado**, **pendente** e **nao_aplicavel**.
-- Recusa IDs duplicados, datas invalidas e estados desconhecidos.
-- Mantem as evidencias no relatorio, escapando marcacao Markdown enviada como texto.
-- Gera contagem por estado e relatorio legivel para revisao.
+- Cadastro de pagina, data, verificacoes com IDs unicos, status e evidencia.
+- Validacao de datas reais, tamanho dos campos e limite de 100 verificacoes por avaliacao.
+- Exportacao Markdown com escape de caracteres de formatacao.
+- Exportacao CSV RFC4180 com protecao contra interpretacao de formulas por planilhas.
+- Relatorio JSON com indicadores globais, agrupamento por prefixo do ID, paginacao e alertas de qualidade.
+- Busca por texto sem diferenciar acentos e maiusculas, filtro por estado, ordenacao e paginacao.
+- Comparacao de duas avaliacoes da **mesma pagina**: melhorias, regressoes, mudancas de aplicabilidade, inclusoes e exclusoes.
+- Diagnostico de evidencias ausentes/curtas e titulos possivelmente duplicados.
+- Testes automatizados Node.js e compilacao TypeScript estrita.
 
 ## Executar
 
-Requer Node.js 22+ e npm. Os dados no exemplo sao ficticios.
+Requer Node.js 22+ e npm. Dados de exemplo ficticios:
 
 ```bash
 npm install
-npm run build
-node dist/cli.js examples/avaliacao.json > relatorio.md
 npm test
+node dist/cli.js examples/avaliacao.json
+node dist/cli.js examples/avaliacao.json --format=csv > checklist.csv
+node dist/cli.js examples/avaliacao.json --format=json --status=pendente --limit=20 > pendencias.json
+node dist/cli.js examples/avaliacao.json --query=teclado --sort=titulo
+node dist/cli.js atual.json --compare=anterior.json > evolucao.md
 ```
 
-O relatorio sera criado em `relatorio.md` no diretorio atual. Consulte `examples/avaliacao.json` para preencher sua avaliacao.
+Opcoes: `--format=markdown|csv|json`, `--status=aprovado|pendente|nao_aplicavel`, `--query=texto`, `--sort=id|titulo|status`, `--offset=N`, `--limit=N` (1 a 100), `--compare=arquivo.json`. O formato padrao e Markdown. Comparacoes nao aceitam filtros ou formatos alternativos.
 
-## Criterios de aceite cobertos
+O campo `id` pode usar prefixos como `form:rotulos` e `midia:legendas` para agrupar criterios. IDs precisam permanecer estaveis entre revisoes para comparacoes confiaveis.
 
-- [x] Criar uma avaliacao de pagina a partir de JSON
-- [x] Registrar verificacoes, status e evidencia
-- [x] Exportar Markdown preservando os itens
-- [x] Testar tratamento de entradas invalidas
+## Interpretacao responsavel
 
-## Limites e proximas etapas
+**Nao e um validador automatico de WCAG nem certificacao de conformidade.** Os resultados dependem de revisoes manuais qualificadas. A taxa de aprovacao considera apenas itens aplicaveis; quando nenhum e aplicavel, retorna `null`. Evidencias vazias geram alertas de qualidade, nao aprovacao automatica.
 
-Este checklist **nao realiza auditoria automatica nem certifica conformidade WCAG**. A verificacao de teclado, rotulos e contraste precisa ser feita por quem avalia. Uma interface web em Svelte e persistencia editavel sao evolucoes futuras. Nenhuma integracao externa nem credencial e exigida.
+A comparacao exige mesma URL e data anterior nao posterior a data atual. Um item removido e reportado como removido, nao como melhoria. Mudancas envolvendo `nao_aplicavel` sao classificadas separadamente.
+
+Os arquivos sao processados localmente. **Nao armazene dados sensiveis em repositorios publicos.** A exportacao CSV evita interpretacao de formulas por planilhas, mas nao substitui controles de seguranca da ferramenta de destino.
+
+## Proximos passos
+
+Interface web, armazenamento editavel, trilha de revisoes assinada e mapeamento assistido de criterios WCAG podem ser implementados em evolucoes futuras.
