@@ -31,11 +31,11 @@ npm test
 node dist/cli.js examples/avaliacao.json
 node dist/cli.js examples/avaliacao.json --format=csv > checklist.csv
 node dist/cli.js examples/avaliacao.json --format=json --status=pendente --limit=20 > pendencias.json
-node dist/cli.js examples/avaliacao.json --query=teclado --sort=titulo
+node dist/cli.js examples/avaliacao.json --query=teclado --sort=titulo --direction=desc
 node dist/cli.js atual.json --compare=anterior.json > evolucao.md
 ```
 
-Opcoes: `--format=markdown|csv|json`, `--status=aprovado|pendente|nao_aplicavel`, `--query=texto`, `--sort=id|titulo|status`, `--offset=N`, `--limit=N` (1 a 100), `--compare=arquivo.json`. O formato padrao e Markdown. Comparacoes nao aceitam filtros ou formatos alternativos.
+Opcoes: `--format=markdown|csv|json`, `--status=aprovado|pendente|nao_aplicavel`, `--query=texto`, `--sort=id|titulo|status`, `--direction=asc|desc` (ordem crescente ou decrescente), `--offset=N`, `--limit=N` (1 a 100), `--compare=arquivo.json`. O formato padrao e Markdown. Comparacoes nao aceitam filtros ou formatos alternativos.
 
 O campo `id` pode usar prefixos como `form:rotulos` e `midia:legendas` para agrupar criterios. IDs precisam permanecer estaveis entre revisoes para comparacoes confiaveis.
 
