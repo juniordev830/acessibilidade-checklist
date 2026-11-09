@@ -60,6 +60,10 @@ function main(): void {
         if (!["id", "titulo", "status"].includes(value)) throw new Error("ordenacao invalida");
         options.sort = value as FilterOptions["sort"];
         break;
+      case "direction":
+        if (!["asc", "desc"].includes(value)) throw new Error("direcao invalida");
+        options.direction = value as FilterOptions["direction"];
+        break;
       case "offset": options.offset = parseInteger(value, name); break;
       case "limit": options.limit = parseInteger(value, name); break;
       case "history":
