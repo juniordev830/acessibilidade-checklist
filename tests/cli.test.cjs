@@ -28,6 +28,48 @@ function withFixtures(fn) {
     rmSync(dir, { recursive: true, force: true });
   }
 }
+for (const sort of ["id", "titulo", "status"]) {
+  test(`cli ordena ${sort} em ambas as direcoes antes de paginar`, () => withFixtures((now) => {
+    const expected = sort === "status" ? ["teclado", "rotulos"] : ["rotulos", "teclado"];
+    for (const direction of [undefined, "asc", "desc"]) {
+      const args = [now, "--format=json", `--sort=${sort}`];
+      if (direction) args.push(`--direction=${direction}`);
+      const ordered = direction === "desc" ? [...expected].reverse() : expected;
+      const result = run(args);
+      assert.equal(result.status, 0, result.stderr);
+      assert.deepEqual(JSON.parse(result.stdout).itens.map((item) => item.id), ordered);
+      const page = run([...args, "--offset=1", "--limit=1"]);
+      assert.equal(page.status, 0, page.stderr);
+      assert.deepEqual(JSON.parse(page.stdout).itens.map((item) => item.id), ordered.slice(1));
+    }
+  }));
+}
+test("cli aplica direcao decrescente na ordenacao padrao", () => withFixtures((now) => {
+  const result = run([now, "--format=json", "--direction=desc"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout).itens.map((item) => item.id), ["teclado", "rotulos"]);
+}));
+for (const direction of ["", "DESC", "invalida"]) {
+  test(`cli rejeita direcao invalida ${JSON.stringify(direction)}`, () => withFixtures((now) => {
+    const result = run([now, `--direction=${direction}`]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /direcao invalida/);
+  }));
+}
+test("cli rejeita direcao repetida", () => withFixtures((now) => {
+  const result = run([now, "--direction=asc", "--direction=desc"]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /opcao duplicada: direction/);
+}));
+for (const mode of ["compare", "history"]) {
+  test(`cli rejeita direcao em modo ${mode}`, () => withFixtures((now, old) => {
+    const result = run([now, `--${mode}=${old}`, "--direction=desc"]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, mode === "compare" ? /comparacao nao aceita/ : /historico aceita apenas/);
+  }));
+}
 test("cli continua aceitando uso original em markdown", () => withFixtures((now) => {
   const result = run([now]);
   assert.equal(result.status, 0, result.stderr);
