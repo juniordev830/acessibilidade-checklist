@@ -18,7 +18,9 @@ Ferramenta local em **TypeScript** para documentar verificacoes **manuais** de a
 
 A interface de linha de comando aceita apenas arquivos JSON regulares com até **1 MB**
 (1.000.000 bytes) por avaliação. Entradas maiores são rejeitadas antes da análise
-para reduzir consumo de memória. O limite também se aplica aos arquivos usados
+para reduzir consumo de memória. O arquivo deve usar UTF-8 válido; bytes inválidos
+são rejeitados para não modificar silenciosamente os textos de evidências.
+UTF-8 com BOM é aceito. O limite também se aplica aos arquivos usados
 em comparações e históricos.
 
 ## Executar
