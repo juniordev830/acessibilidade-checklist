@@ -119,6 +119,36 @@ test("cli rejeita arquivo maior que 1 MB antes de analisar JSON", () => withFixt
   assert.match(result.stderr, /limite de 1 MB/);
 }));
 
+test("cli rejeita UTF-8 invalido em campo JSON sem alterar silenciosamente evidencias", () =>
+    withFixtures((now) => {
+  const raw = Buffer.from(JSON.stringify(sample), "utf8");
+  const marker = Buffer.from("Rotulos", "utf8");
+  const index = raw.indexOf(marker);
+  assert.ok(index >= 0, "marcador de titulo presente");
+  raw[index] = 0xff;
+  writeFileSync(now, raw);
+  const result = run([now]);
+  assert.equal(result.status, 2);
+  assert.equal(result.stdout, "");
+  assert.match(result.stderr, /encoded|UTF-8|utf-8/i);
+}));
+
+test("cli preserva titulos validos com acentos e aceita BOM UTF-8", () =>
+    withFixtures((now) => {
+  const accented = {
+    ...sample,
+    itens: sample.itens.map((item) => ({ ...item, titulo: "Rótulos e ações" })),
+  };
+  writeFileSync(now, Buffer.concat([
+    Buffer.from([0xef, 0xbb, 0xbf]),
+    Buffer.from(JSON.stringify(accented), "utf8"),
+  ]));
+  const result = run([now, "--format=json"]);
+  assert.equal(result.status, 0, result.stderr);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.itens[0].titulo, "Rótulos e ações");
+}));
+
 test("cli rejeita caminho de diretorio como arquivo de avaliacao", () => withFixtures((now) => {
   const { dirname } = require("node:path");
   const result = run([dirname(now)]);
