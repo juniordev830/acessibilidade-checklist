@@ -28,7 +28,10 @@ function readAssessment(path: string) {
   const data = fs.readFileSync(path);
   // Recheck after read in case a writer changed the file between operations.
   if (data.length > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
-  return validateAssessment(JSON.parse(data.toString("utf8")) as unknown);
+  // Buffer.toString("utf8") replaces malformed byte sequences with U+FFFD.
+  // A strict decoder rejects corruption rather than silently changing evidence.
+  const json = new TextDecoder("utf-8", { fatal: true }).decode(data);
+  return validateAssessment(JSON.parse(json) as unknown);
 }
 function main(): void {
   const args = process.argv.slice(2);
