@@ -69,3 +69,7 @@ node dist/cli.js atual.json --history=anterior1.json,anterior2.json --format=jso
 ```
 
 O historico aceita entre 2 e 52 avaliacoes, datas estritamente crescentes e a mesma pagina. Relata transicoes por criterio e regressoes, sem considerar itens excluidos como melhorias. Nao infere resultados de testes de acessibilidade; apenas compara evidencias registradas manualmente.
+
+## Documentação de desenvolvimento
+
+O [guia de validação e evolução](docs/GUIA_DE_VALIDACAO.md) registra o estado atual, os testes e os próximos incrementos deste projeto.
