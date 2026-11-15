@@ -90,3 +90,20 @@ test("historico com criterios sem aplicabilidade apresenta N/A", () => {
   ]);
   assert.match(renderHistoryMarkdown(h), /\| N\/A \|/);
 });
+
+test("historico acompanha avaliacoes grandes com reordenacao e lacunas", () => {
+  const items = Array.from({ length: 100 }, (_, i) => check("criterio-" + i, "aprovado"));
+  const last = [...items.slice(1)].reverse();
+  last[0] = check("criterio-99", "pendente", "Título editado");
+  const h = buildHistory([
+    make("2026-11-01", items),
+    make("2026-11-02", last),
+    make("2026-11-03", items),
+  ]);
+  assert.equal(h.criterios.length, 100);
+  assert.deepEqual(h.criterios.find(({ id }) => id === "criterio-0").estados, [
+    "aprovado", null, "aprovado",
+  ]);
+  assert.equal(h.criterios.find(({ id }) => id === "criterio-99").mudancasDeStatus, 2);
+  assert.deepEqual(h.totais, { melhorias: 1, regressoes: 1, inclusoes: 1, remocoes: 1 });
+});
