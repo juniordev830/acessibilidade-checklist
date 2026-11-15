@@ -1,4 +1,4 @@
-import { Assessment, Status } from "./report";
+import { Assessment, Check, Status } from "./report";
 import { compareAssessments, CheckChange, Comparison } from "./compare";
 import { AssessmentSummary, summarizeAssessment } from "./analytics";
 
@@ -74,9 +74,17 @@ export function buildHistory(assessments: readonly Assessment[]): History {
       data: current.data, resumo: summarizeAssessment(current), alteracoes: changes,
     });
   }
-  const ids = new Set(assessments.flatMap((a) => a.itens.map((item) => item.id)));
+  const ids = new Set<string>();
+  const itemsByAssessment = assessments.map((assessment) => {
+    const items = new Map<string, Check>();
+    for (const item of assessment.itens) {
+      ids.add(item.id);
+      if (!items.has(item.id)) items.set(item.id, item);
+    }
+    return items;
+  });
   const criterios: HistoryItem[] = [...ids].sort(collator.compare).map((id) => {
-    const entries = assessments.map((assessment) => assessment.itens.find((item) => item.id === id));
+    const entries = itemsByAssessment.map((items) => items.get(id));
     const indexes = entries.flatMap((entry, index) => entry ? [index] : []);
     const last = entries[indexes[indexes.length - 1]]!;
     let changes = 0;
