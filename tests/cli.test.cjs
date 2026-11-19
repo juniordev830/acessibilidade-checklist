@@ -12,8 +12,8 @@ const sample = {
     { id: "rotulos", titulo: "Rotulos", status: "pendente", evidencia: "Campo sem label" },
   ],
 };
-function run(args) {
-  return spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
+function run(args, input) {
+  return spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8", input });
 }
 function withFixtures(fn) {
   const dir = mkdtempSync(join(tmpdir(), "checklist-"));
@@ -28,6 +28,15 @@ function withFixtures(fn) {
     rmSync(dir, { recursive: true, force: true });
   }
 }
+test("cli aceita uma avaliação no pipe e conserva o limite de bytes", () => withFixtures((now) => {
+  const flags = ["--format=json", "--status=pendente"];
+  const result = run(["-", ...flags], JSON.stringify(sample));
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout, run([now, ...flags]).stdout);
+  const tooLarge = run(["-"], " ".repeat(1_000_001));
+  assert.equal(tooLarge.status, 2);
+  assert.match(tooLarge.stderr, /1 MB/);
+}));
 for (const sort of ["id", "titulo", "status"]) {
   test(`cli ordena ${sort} em ambas as direcoes antes de paginar`, () => withFixtures((now) => {
     const expected = sort === "status" ? ["teclado", "rotulos"] : ["rotulos", "teclado"];
