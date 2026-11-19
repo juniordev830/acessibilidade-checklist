@@ -20,12 +20,24 @@ function parseInteger(value: string, name: string): number {
   if (!Number.isSafeInteger(number)) throw new Error(name + " fora do intervalo seguro");
   return number;
 }
-function readAssessment(path: string) {
-  // Reject oversized inputs before allocating/parsing the entire document.
-  const metadata = fs.statSync(path);
-  if (!metadata.isFile()) throw new Error("arquivo de avaliacao deve ser regular");
-  if (metadata.size > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
-  const data = fs.readFileSync(path);
+function readAssessment(path: string, fromStdin = false) {
+  let data: Uint8Array;
+  if (fromStdin) {
+    const buffer = new Uint8Array(MAX_INPUT_BYTES + 1);
+    let length = 0;
+    while (length < buffer.length) {
+      const count = fs.readSync(0, buffer, length, buffer.length - length, null);
+      if (!count) break;
+      length += count;
+    }
+    data = buffer.subarray(0, length);
+  } else {
+    // Reject oversized inputs before allocating/parsing the entire document.
+    const metadata = fs.statSync(path);
+    if (!metadata.isFile()) throw new Error("arquivo de avaliacao deve ser regular");
+    if (metadata.size > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
+    data = fs.readFileSync(path);
+  }
   // Recheck after read in case a writer changed the file between operations.
   if (data.length > MAX_INPUT_BYTES) throw new Error("arquivo excede limite de 1 MB");
   // Buffer.toString("utf8") replaces malformed byte sequences with U+FFFD.
@@ -36,7 +48,7 @@ function readAssessment(path: string) {
 function main(): void {
   const args = process.argv.slice(2);
   if (args.length === 0 || args[0].startsWith("--")) {
-    throw new Error("Uso: node dist/cli.js arquivo.json [--format=markdown|csv|json|plan] [--status=pendente] [--query=texto] [--sort=id|titulo|status] [--offset=0] [--limit=100] [--compare=anterior.json]");
+    throw new Error("Uso: node dist/cli.js arquivo.json|- [--format=markdown|csv|json|plan] [--status=pendente] [--query=texto] [--sort=id|titulo|status] [--offset=0] [--limit=100] [--compare=anterior.json]");
   }
   const options: FilterOptions = {};
   let format = "markdown";
@@ -80,7 +92,7 @@ function main(): void {
       default: throw new Error("opcao desconhecida: " + name);
     }
   }
-  const assessment = readAssessment(args[0]);
+  const assessment = readAssessment(args[0], args[0] === "-");
   if (comparePath !== undefined && historyPaths !== undefined) {
     throw new Error("comparacao e historico nao podem ser combinados");
   }
