@@ -32,8 +32,12 @@ export function compareAssessments(previous: Assessment, current: Assessment): C
   // A snapshot may have been mutated after initial validation; never hide duplicate checks
   // by letting Map overwrite earlier entries.
   for (const [label, assessment] of [["anterior", previous], ["atual", current]] as const) {
-    if (!assessment || !Array.isArray(assessment.itens)) {
-      throw new Error("avaliacao " + label + " invalida");
+    if (!assessment || !Array.isArray(assessment.itens) ||
+        assessment.itens.length < 1 || assessment.itens.length > 100) {
+      throw new Error("avaliacao " + label + " deve ter de 1 a 100 verificacoes");
+    }
+    if (assessment.itens.some((item) => !item || typeof item.id !== "string" || !item.id.trim())) {
+      throw new Error("ids invalidos na avaliacao " + label);
     }
     const ids = assessment.itens.map((item) => item.id);
     if (new Set(ids).size !== ids.length) {
