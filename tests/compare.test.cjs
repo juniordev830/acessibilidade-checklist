@@ -93,3 +93,15 @@ test("comparacao rejeita snapshot sem colecao de itens", () => {
   const b = current();
   assert.throws(() => compareAssessments({ ...previous(), itens: null }, b), /invalida/);
 });
+
+test("comparacao rejeita snapshots manipulados com ids vazios ou itens demais", () => {
+  const a = previous();
+  const b = current();
+  a.itens[0].id = "";
+  assert.throws(() => compareAssessments(a, b), /ids invalidos/);
+  const tooMany = previous();
+  tooMany.itens = Array.from({ length: 101 }, (_, index) => ({
+    ...item("id-" + index, "aprovado"),
+  }));
+  assert.throws(() => compareAssessments(tooMany, b), /1 a 100/);
+});
