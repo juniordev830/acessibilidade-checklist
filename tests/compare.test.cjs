@@ -78,3 +78,18 @@ test("classifica aprovado para nao aplicavel como aplicabilidade", () => {
   const b = make("2026-11-08", [item("x", "nao_aplicavel")]);
   assert.equal(compareAssessments(a, b).resumo.aplicabilidade, 1);
 });
+
+test("comparacao rejeita ids duplicados apos mutacao de snapshot", () => {
+  const a = previous();
+  const b = current();
+  a.itens.push({ ...a.itens[0] });
+  assert.throws(() => compareAssessments(a, b), /duplicados.*anterior/);
+  const previousClean = previous();
+  b.itens.push({ ...b.itens[0] });
+  assert.throws(() => compareAssessments(previousClean, b), /duplicados.*atual/);
+});
+
+test("comparacao rejeita snapshot sem colecao de itens", () => {
+  const b = current();
+  assert.throws(() => compareAssessments({ ...previous(), itens: null }, b), /invalida/);
+});
