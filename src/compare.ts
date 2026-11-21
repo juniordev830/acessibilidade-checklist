@@ -29,6 +29,17 @@ function kind(before: Status | null, after: Status | null): ChangeKind {
   return before === "pendente" && after === "aprovado" ? "melhorou" : "regrediu";
 }
 export function compareAssessments(previous: Assessment, current: Assessment): Comparison {
+  // A snapshot may have been mutated after initial validation; never hide duplicate checks
+  // by letting Map overwrite earlier entries.
+  for (const [label, assessment] of [["anterior", previous], ["atual", current]] as const) {
+    if (!assessment || !Array.isArray(assessment.itens)) {
+      throw new Error("avaliacao " + label + " invalida");
+    }
+    const ids = assessment.itens.map((item) => item.id);
+    if (new Set(ids).size !== ids.length) {
+      throw new Error("ids duplicados na avaliacao " + label);
+    }
+  }
   if (previous.pagina !== current.pagina) {
     throw new Error("comparacao exige a mesma pagina nas duas avaliacoes");
   }
