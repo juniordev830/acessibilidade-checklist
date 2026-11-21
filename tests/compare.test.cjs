@@ -91,7 +91,7 @@ test("comparacao rejeita ids duplicados apos mutacao de snapshot", () => {
 
 test("comparacao rejeita snapshot sem colecao de itens", () => {
   const b = current();
-  assert.throws(() => compareAssessments({ ...previous(), itens: null }, b), /invalida/);
+  assert.throws(() => compareAssessments({ ...previous(), itens: null }, b), /1 a 100/);
 });
 
 test("comparacao rejeita snapshots manipulados com ids vazios ou itens demais", () => {
