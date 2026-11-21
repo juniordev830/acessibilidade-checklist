@@ -73,3 +73,4 @@ O historico aceita entre 2 e 52 avaliacoes, datas estritamente crescentes e a me
 ## Documentação de desenvolvimento
 
 O [guia de validação e evolução](docs/GUIA_DE_VALIDACAO.md) registra o estado atual, os testes e os próximos incrementos deste projeto.
+\nAs comparações validam novamente a unicidade dos IDs dos dois snapshots no momento da análise. Isso evita que alterações feitas em memória depois do carregamento escondam verificações duplicadas.\n
